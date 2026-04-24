@@ -1,3 +1,4 @@
+from datetime import datetime
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog,
@@ -90,7 +91,7 @@ class MainWindow(QMainWindow):
         self.delete_button.setEnabled(False)
         footer_layout.addWidget(self.delete_button)
 
-    def load_characters(self):
+    def load_characters(self, select_character_id=None):
         search_text = self.search_input.text()
         self.characters = list_characters(search_text)
         self.selected_character_id = None
@@ -103,7 +104,13 @@ class MainWindow(QMainWindow):
             self.table.setItem(row_index, 2, QTableWidgetItem(character["clase"] or ""))
             age_value = "" if character["edad"] is None else str(character["edad"])
             self.table.setItem(row_index, 3, QTableWidgetItem(age_value))
-            self.table.setItem(row_index, 4, QTableWidgetItem(character["updated_at"]))
+
+            try:
+                updated_dt = datetime.fromisoformat(character["updated_at"])
+                updated_text = updated_dt.strftime("%d/%m/%Y %H:%M")
+            except (ValueError, TypeError):
+                updated_text = character["updated_at"] or ""
+            self.table.setItem(row_index, 4, QTableWidgetItem(updated_text))
         
         self.table.setVisible(bool(self.characters))
         self.empty_state_label.setVisible(not self.characters)
@@ -120,6 +127,12 @@ class MainWindow(QMainWindow):
         self.open_button.setEnabled(False)
         self.delete_button.setEnabled(False)
         self.table.resizeColumnsToContents()
+
+        if select_character_id is not None:
+            for row_index, character in enumerate(self.characters):
+                if character["id"] == select_character_id:
+                    self.table.selectRow(row_index)
+                    break
 
     def clear_search(self):
         self.search_input.clear()
@@ -139,7 +152,7 @@ class MainWindow(QMainWindow):
     def new_character(self):
         dialog = CharacterForm(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.load_characters()
+            self.load_characters(select_character_id=dialog.saved_character_id)
 
     def open_character(self):
         if self.selected_character_id is None:
@@ -153,7 +166,7 @@ class MainWindow(QMainWindow):
             return
         
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.load_characters()
+            self.load_characters(select_character_id=dialog.saved_character_id)
     
     def delete_selected_character(self):
         if self.selected_character_id is None:

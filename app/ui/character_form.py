@@ -28,7 +28,7 @@ class CharacterForm(QDialog):
         self.setWindowTitle(
             "Nuevo personaje" if self.character_data is None else "Editar personaje"
         )
-        self.resize(5000, 420)
+        self.resize(500, 420)
 
         self._build_ui()
 
