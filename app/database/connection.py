@@ -27,4 +27,30 @@ def init_database():
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS habilidades (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL,
+                tipo TEXT NOT NULL,
+                descripcion TEXT,
+                costo TEXT,
+                notas TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS personaje_habilidades (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                personaje_id INTEGER NOT NULL,
+                habilidad_id INTEGER NOT NULL,
+                FOREIGN KEY (personaje_id) REFERENCES personajes (id) ON DELETE CASCADE,
+                FOREIGN KEY (habilidad_id) REFERENCES habilidades (id) ON DELETE RESTRICT,
+                UNIQUE (personaje_id, habilidad_id)
+            )            
+            """
+        )
         connection.commit()
